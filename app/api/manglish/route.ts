@@ -24,13 +24,16 @@ Respond ONLY with valid JSON in this exact shape:
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) return NextResponse.json({ error: "OpenAI is not configured." }, { status: 503 });
+    if (!process.env.GROQ_API_KEY) return NextResponse.json({ error: "Groq API key is not configured." }, { status: 503 });
     const { text, location } = await request.json();
     if (typeof text !== "string" || !text.trim()) return NextResponse.json({ error: "Text description is required." }, { status: 400 });
     
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const completion = await openai.chat.completions.create({ 
-      model: "gpt-4o", 
+    const groq = new OpenAI({ 
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1"
+    });
+    const completion = await groq.chat.completions.create({ 
+      model: "llama-3.3-70b-versatile", 
       temperature: 0.35, 
       response_format: { type: "json_object" }, 
       messages: [
@@ -44,6 +47,6 @@ export async function POST(request: Request) {
     return NextResponse.json(parsed);
   } catch (error) {
     console.error("Manglish analysis failed", error);
-    return NextResponse.json({ error: "We could not analyze the text. Please try again." }, { status: 502 });
+    return NextResponse.json({ error: (error as Error).message || "We could not analyze the text. Please try again." }, { status: 502 });
   }
 }
