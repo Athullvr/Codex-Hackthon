@@ -1,38 +1,70 @@
-# Codex-Hackthon
+# MyKochi — Civic Intelligence Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+MyKochi helps Kochi residents turn a short civic-issue description into a ready-to-submit municipal complaint. It classifies the issue, identifies the responsible department, drafts English and Malayalam complaint text, and links the user to the official MyKochi complaint portal.
 
-## Getting Started
+## Features
 
-First, run the development server:
+- Describe a civic issue in English, Malayalam, or Manglish.
+- Optional voice input in browsers that support speech recognition.
+- Ward selection from the Kochi Municipal Corporation ward list.
+- Issue classification by type, severity, and department.
+- Editable English and Malayalam complaint drafts.
+- Copy-to-clipboard action and a direct link to the official MyKochi portal.
+- Resilient local fallback triage: reports continue to work if the Gemini API key is unavailable or the provider response fails.
+
+## Tech stack
+
+- Next.js 14 / React 18 / TypeScript
+- Tailwind CSS
+- OpenAI-compatible Gemini API integration
+- Vercel deployment
+
+## Run locally
+
+Requirements: Node.js 20+ and npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To run the production build locally:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Optional AI configuration
 
-To learn more about Next.js, take a look at the following resources:
+Create `.env.local` with a Gemini key to enable AI-powered classification and drafting:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+GEMINI_API_KEY=your-gemini-api-key
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Without this key, the app uses its built-in civic-triage fallback so the reporting flow remains available.
 
-## Deploy on Vercel
+For Vercel, add `GEMINI_API_KEY` under **Project Settings → Environment Variables** and redeploy. Never commit `.env.local`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+app/
+  api/manglish/route.ts  # Report classification and draft generation
+  page.tsx               # Reporting experience and dashboard
+  globals.css            # Shared styles
+lib/wards.ts             # Kochi ward data and location helpers
+```
+
+## Deployment
+
+The production site is hosted at [ariyippu.vercel.app](https://ariyippu.vercel.app/).
+
+Deploy from the project directory:
+
+```bash
+npx vercel --prod
+```
