@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Paraathi | AI Civic Issue Reporter",
-  description: "Create clear bilingual civic complaints for Kochi.",
+  title: "MyKochi | Civic Intelligence Platform",
+  description: "A citizen-centric portal for Kochi Municipal Corporation.",
 };
 
 export default function RootLayout({
