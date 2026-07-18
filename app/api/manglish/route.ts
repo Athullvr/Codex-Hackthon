@@ -24,16 +24,16 @@ Respond ONLY with valid JSON in this exact shape:
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.GROQ_API_KEY) return NextResponse.json({ error: "Groq API key is not configured." }, { status: 503 });
+    if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Gemini API key is not configured." }, { status: 503 });
     const { text, location } = await request.json();
     if (typeof text !== "string" || !text.trim()) return NextResponse.json({ error: "Text description is required." }, { status: 400 });
     
-    const groq = new OpenAI({ 
-      apiKey: process.env.GROQ_API_KEY,
-      baseURL: "https://api.groq.com/openai/v1"
+    const gemini = new OpenAI({ 
+      apiKey: process.env.GEMINI_API_KEY,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai"
     });
-    const completion = await groq.chat.completions.create({ 
-      model: "llama-3.3-70b-versatile", 
+    const completion = await gemini.chat.completions.create({ 
+      model: "gemini-3.5-flash", 
       temperature: 0.35, 
       response_format: { type: "json_object" }, 
       messages: [
