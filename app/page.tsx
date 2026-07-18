@@ -16,6 +16,7 @@ export default function Home() {
   const [ward, setWard] = useState(""); 
   const [error, setError] = useState(""); 
   const [activeTab, setActiveTab] = useState("Dashboard");
+  const [copied, setCopied] = useState(false);
   
   const [isListening, setIsListening] = useState(false);
   const [supportSpeech, setSupportSpeech] = useState(false);
@@ -62,17 +63,17 @@ export default function Home() {
   }
 
   async function analyzeText() {
-    if (!manglish.trim()) return;
+    if (!manglish.trim() || !ward) return;
     setStage("loading"); setError("");
     try {
-      const response = await fetch("/api/manglish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: manglish, location: ward || "Vyttila, Kochi" }) });
+      const response = await fetch("/api/manglish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: manglish, location: ward }) });
       const generated = await response.json();
       if (!response.ok) throw new Error(generated.error || "Analysis failed.");
       setClassification({ issueType: generated.issueType, severity: generated.severity as Classification["severity"], department: generated.department as Classification["department"] });
       setDraft({ subject: generated.subject, descriptionEnglish: generated.descriptionEnglish, descriptionMalayalam: generated.descriptionMalayalam });
       setStage("result");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "We could not analyze this text."); setStage("capture");
+    } catch {
+      setError("We couldn't create the report right now. Please try again in a moment."); setStage("capture");
     }
   }
 
@@ -87,8 +88,20 @@ export default function Home() {
     setIsListening(false);
   }
 
+  async function copyDraft() {
+    if (!draft) return;
+    await navigator.clipboard.writeText(`Subject: ${draft.subject}\n\nEnglish complaint:\n${draft.descriptionEnglish}\n\nMalayalam complaint:\n${draft.descriptionMalayalam}`);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2000);
+  }
+
+  function showOverview(tab: string) {
+    setActiveTab(tab);
+    document.getElementById("analytics")?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return <main className="min-h-screen overflow-hidden bg-[#fafaf6] text-[#0c336b]"><div className="relative mx-auto flex min-h-screen max-w-[1440px] flex-col px-5 pb-6 pt-5 sm:px-8 lg:px-12">
-    <header className="flex items-center justify-between"><a href="#home" className="flex items-center gap-2.5"><span className="grid size-9 place-items-center rounded-xl bg-[#0c336b] text-lg font-bold text-[#fafaf6]">M</span><span className="text-lg font-semibold tracking-tight">MyKochi</span></a><nav className="hidden items-center gap-7 text-sm text-[#4a4a4a] md:flex"><a href="#report">Complaints</a><a href="#ward">Wards Lookup</a><a href="#analytics">Analytics</a><a href="#contact">Contact</a></nav><button onClick={() => document.getElementById("report")?.scrollIntoView()} className="rounded-md bg-[#0c336b] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0f428a]">Report issue</button></header>
+    <header className="flex items-center justify-between"><a href="#home" className="flex items-center gap-2.5"><span className="grid size-9 place-items-center rounded-xl bg-[#0c336b] text-lg font-bold text-[#fafaf6]">M</span><span className="text-lg font-semibold tracking-tight">MyKochi</span></a><nav className="hidden items-center gap-7 text-sm text-[#4a4a4a] md:flex"><a href="#report">Complaints</a><button onClick={() => showOverview("Wards Lookup")}>Wards Lookup</button><button onClick={() => showOverview("Dashboard")}>Analytics</button><button onClick={() => showOverview("Official Portal")}>Official Portal</button></nav><button onClick={() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" })} className="rounded-md bg-[#0c336b] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#0f428a]">Report issue</button></header>
     <section id="home" className="relative flex flex-1 items-center justify-center py-14 sm:py-18 lg:py-12"><div className="hero-glow absolute left-1/2 top-1/2 size-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-full" /><div className="relative z-10 w-full text-center"><p className="mb-4 text-xs font-semibold uppercase tracking-[.22em] text-[#70706d]">Kochi Municipal Corporation</p><h1 className="mx-auto max-w-4xl font-serif text-4xl leading-[1.04] tracking-[-.045em] sm:text-6xl text-[#0c336b]">Civic intelligence that actually resolves local issues.</h1>
       <section id="report" className={`mykochi-card mx-auto mt-8 w-full text-left ${stage === "result" ? "max-w-5xl" : "max-w-xl"}`}>
         
@@ -104,6 +117,12 @@ export default function Home() {
           />
         </label>
 
+        <label className="form-label mt-4 block" htmlFor="ward">Your ward
+          <select id="ward" value={ward} onChange={(e) => setWard(e.target.value)} className="form-field mt-2">
+            <option value="">Select your ward</option>{wards.map((item) => <option key={item.name}>{item.name}</option>)}
+          </select>
+        </label>
+
         {supportSpeech && (
           <div className="mt-3">
             <button 
@@ -117,14 +136,14 @@ export default function Home() {
         )}
 
         {error && <div className="error-alert mt-4"><span>{error}</span><button onClick={analyzeText} disabled={!manglish}>Retry</button></div>}
-        <div className="mt-5"><button disabled={!manglish || isListening} onClick={analyzeText} className="dark-action w-full disabled:cursor-not-allowed disabled:opacity-40">Analyze Issue <span>→</span></button></div></div>}
+        <div className="mt-5"><button disabled={!manglish || !ward || isListening} onClick={analyzeText} className="dark-action w-full disabled:cursor-not-allowed disabled:opacity-40">Analyze Issue <span>→</span></button></div></div>}
         
         {stage === "loading" && <div className="p-8 text-center"><div className="loader mx-auto" /><p className="mt-5 font-serif text-2xl text-[#0c336b]">Preparing your report</p><div className="mt-6 space-y-3 text-left text-sm text-[#65655f]"><p>✓ Analyzing context and details...</p><p className="animate-pulse font-semibold text-[#137333]">◌ Triaging department via Groq AI...</p><p className="text-[#999991]">○ Drafting formal English & Malayalam complaints...</p></div></div>}
         
         {stage === "result" && classification && draft && <div className="p-5 sm:p-6"><div className="flex items-start justify-between gap-3"><div><p className="font-serif text-2xl text-[#0c336b]">Your civic report</p><p className="mt-1 text-sm text-[#666661]">Review, edit, and send it to MyKochi.</p></div><button onClick={reset} className="text-xs font-semibold text-[#5b5b55] underline underline-offset-4">Start over</button></div><div className="mt-6 grid gap-6 lg:grid-cols-[.78fr_1.22fr]"><div className="space-y-4"><div><p className="text-xs font-semibold uppercase tracking-[.13em] text-[#7a7a74]">Detected issue</p><p className="mt-1 font-serif text-xl text-[#0c336b]">{classification.issueType}</p><div className="mt-3 flex flex-wrap gap-2"><span className={`severity severity-${classification.severity}`}>{classification.severity === "high" ? "High Severity" : classification.severity === "medium" ? "Medium Severity" : "Low Severity"}</span><span className="department-badge">{classification.department === "Engineering" ? "Engineering Dept" : classification.department === "Health" ? "Health Dept" : "Revenue Dept"}</span></div></div><label className="form-label" htmlFor="ward">Ward selector<select id="ward" value={ward} onChange={(e) => setWard(e.target.value)} className="form-field mt-2"><option value="">Select a ward</option>{wards.map((item) => <option key={item.name}>{item.name}</option>)}</select></label></div><div className="space-y-4"><label className="form-label">Subject line<input className="form-field mt-2" value={draft.subject} onChange={(e) => setDraft({ ...draft, subject: e.target.value })} /></label><label className="form-label">English complaint<textarea className="form-field mt-2 min-h-28" value={draft.descriptionEnglish} onChange={(e) => setDraft({ ...draft, descriptionEnglish: e.target.value })} /></label><label className="form-label">Malayalam complaint<textarea className="form-field mt-2 min-h-28 leading-7" value={draft.descriptionMalayalam} onChange={(e) => setDraft({ ...draft, descriptionMalayalam: e.target.value })} /></label></div></div><div className={`validation-alert ${verified ? "validation-ready" : "validation-warning"}`}><span>{verified ? "✓" : "!"}</span><p>{verified ? "Verified & Ready — all complaint fields are complete." : "Complete all complaint fields before submitting."}</p></div><div className="mt-4 flex flex-col gap-3 sm:flex-row"><a className="dark-action flex-1" href="https://mykochi.lsgkerala.gov.in/index/complaint" target="_blank" rel="noreferrer">Open in MyKochi <span>↗</span></a><button onClick={reset} className="outline-action sm:w-auto">Start Over</button></div></div>}
-      
+        {stage === "result" && draft && <div className="px-5 pb-5 sm:px-6 sm:pb-6"><button onClick={copyDraft} className="outline-action w-full">{copied ? "Copied complaint" : "Copy complaint"}</button></div>}
       </section></div></section>
-    <Analytics activeTab={activeTab} setActiveTab={setActiveTab} /></div><span id="contact" className="sr-only">Contact</span></main>;
+    <Analytics activeTab={activeTab} setActiveTab={setActiveTab} /></div></main>;
 }
 
 function Analytics({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
