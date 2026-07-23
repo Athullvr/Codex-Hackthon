@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MyKochi | Civic Intelligence Platform",
-  description: "A citizen-centric portal for Kochi Municipal Corporation.",
+  title: "Parathi.in | Civic Intelligence Platform",
+  description: "A citizen-centric complaint drafting portal.",
 };
 
 export default function RootLayout({

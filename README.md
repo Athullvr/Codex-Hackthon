@@ -1,6 +1,6 @@
-# MyKochi — Civic Intelligence Platform
+# Parathi.in — Civic Intelligence Platform
 
-MyKochi helps Kochi residents turn a short civic-issue description into a ready-to-submit municipal complaint. It classifies the issue, identifies the responsible department, drafts English and Malayalam complaint text, and links the user to the official MyKochi complaint portal.
+Parathi.in helps residents turn a short civic-issue description into a ready-to-submit municipal complaint. It classifies the issue, identifies the responsible department, drafts English and Malayalam complaint text, and links the user to the official municipal complaint portal.
 
 ## Features
 
@@ -9,7 +9,7 @@ MyKochi helps Kochi residents turn a short civic-issue description into a ready-
 - Ward selection from the Kochi Municipal Corporation ward list.
 - Issue classification by type, severity, and department.
 - Editable English and Malayalam complaint drafts.
-- Copy-to-clipboard action and a direct link to the official MyKochi portal.
+- Copy-to-clipboard action and a direct link to the official portal.
 - Resilient local fallback triage: reports continue to work if the Gemini API key is unavailable or the provider response fails.
 
 ## Tech stack
@@ -61,7 +61,7 @@ lib/wards.ts             # Kochi ward data and location helpers
 
 ## Deployment
 
-The production site is hosted at [ariyippu.vercel.app](https://ariyippu.vercel.app/).
+The production site is hosted at [parathi.in](https://parathi.in).
 
 Deploy from the project directory:
 
