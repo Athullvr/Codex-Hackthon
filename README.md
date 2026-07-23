@@ -61,7 +61,7 @@ lib/wards.ts             # Kochi ward data and location helpers
 
 ## Deployment
 
-The production site is hosted at [parathi.in](https://parathi.in).
+The production site is hosted at [parathi-in.vercel.app](https://parathi-in.vercel.app).
 
 Deploy from the project directory:
 
